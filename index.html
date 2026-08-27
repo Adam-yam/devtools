@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Tools - JSON, YAML, Regex</title>
+    <link rel="icon" type="image/png" href="pics/icon.png">
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('devtools-theme');
+                var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1>Dev Tools</h1>
+                <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()" aria-label="다크 모드 전환">🌙</button>
+            </div>
+            <p>JSON · YAML · Regex Tester</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="json">JSON</button>
+            <button class="tab-btn" data-tab="yaml">YAML</button>
+            <button class="tab-btn" data-tab="regex">Regex</button>
+            <button class="tab-btn" data-tab="diff">Diff</button>
+        </div>
+
+        <!-- JSON Tab -->
+        <div id="json" class="tab-content active">
+            <div class="tool-section">
+                <div class="section-header">
+                    <h2>JSON Formatter</h2>
+                    <div class="header-actions">
+                        <button class="file-btn" type="button" onclick="convertJSONtoYAML()">→ YAML</button>
+                        <button class="file-btn" type="button" onclick="shareJSON()">공유</button>
+                        <button class="file-btn" type="button" id="json-sample-btn" onclick="loadSampleJSON()">샘플 불러오기</button>
+                        <label class="file-btn">
+                            파일 불러오기
+                            <input type="file" id="json-file" accept=".json,application/json" hidden>
+                        </label>
+                    </div>
+                </div>
+                <textarea id="json-input" placeholder="JSON을 붙여넣거나 파일을 끌어다 놓으세요..."></textarea>
+                <div class="input-meta">
+                    <div id="json-filename" class="filename"></div>
+                    <div id="json-counter" class="char-counter">0자 · 0줄</div>
+                </div>
+                <div class="button-group">
+                    <button onclick="formatJSON()">포맷</button>
+                    <button onclick="minifyJSON()">압축</button>
+                    <button onclick="clearJSON()">초기화</button>
+                </div>
+                <div class="output-header">
+                    <span class="output-label">결과</span>
+                    <div class="view-toggle">
+                        <button type="button" class="view-btn active" data-view="text" onclick="setJSONView('text', this)">텍스트</button>
+                        <button type="button" class="view-btn" data-view="tree" onclick="setJSONView('tree', this)">트리</button>
+                        <button type="button" class="view-btn" data-view="schema" onclick="setJSONView('schema', this)">스키마</button>
+                    </div>
+                </div>
+                <div id="json-output" class="output"></div>
+                <div id="json-stats" class="json-stats"></div>
+                <div class="output-actions">
+                    <button class="export-btn" onclick="copyJSON()">복사</button>
+                    <button class="export-btn" onclick="exportJSON()">내보내기</button>
+                </div>
+                <div id="json-status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- YAML Tab -->
+        <div id="yaml" class="tab-content">
+            <div class="tool-section">
+                <div class="section-header">
+                    <h2>YAML Formatter</h2>
+                    <div class="header-actions">
+                        <button class="file-btn" type="button" onclick="convertYAMLtoJSON()">→ JSON</button>
+                        <button class="file-btn" type="button" onclick="shareYAML()">공유</button>
+                        <button class="file-btn" type="button" id="yaml-sample-btn" onclick="loadSampleYAML()">샘플 불러오기</button>
+                        <label class="file-btn">
+                            파일 불러오기
+                            <input type="file" id="yaml-file" accept=".yaml,.yml,text/yaml" hidden>
+                        </label>
+                    </div>
+                </div>
+                <textarea id="yaml-input" placeholder="YAML을 붙여넣거나 파일을 끌어다 놓으세요..."></textarea>
+                <div class="input-meta">
+                    <div id="yaml-filename" class="filename"></div>
+                    <div id="yaml-counter" class="char-counter">0자 · 0줄</div>
+                </div>
+                <div class="button-group">
+                    <button onclick="formatYAML()">포맷</button>
+                    <button onclick="clearYAML()">초기화</button>
+                </div>
+                <div id="yaml-output" class="output"></div>
+                <div class="output-actions">
+                    <button class="export-btn" onclick="copyYAML()">복사</button>
+                    <button class="export-btn" onclick="exportYAML()">내보내기</button>
+                </div>
+                <div id="yaml-status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- Regex Tab -->
+        <div id="regex" class="tab-content">
+            <div class="tool-section">
+                <h2>Regex Tester</h2>
+                <div class="pattern-shortcuts">
+                    <button type="button" class="chip-btn" data-preset="email">이메일</button>
+                    <button type="button" class="chip-btn" data-preset="url">URL</button>
+                    <button type="button" class="chip-btn" data-preset="phone">전화번호</button>
+                    <button type="button" class="chip-btn" data-preset="date">날짜</button>
+                </div>
+                <div class="regex-inputs">
+                    <div>
+                        <label>정규식 패턴:</label>
+                        <input type="text" id="regex-pattern" placeholder="/^[a-z]+$/" oninput="testRegex()">
+                    </div>
+                    <div>
+                        <label>플래그:</label>
+                        <div class="flag-toggles">
+                            <button type="button" class="flag-btn" data-flag="g">g</button>
+                            <button type="button" class="flag-btn" data-flag="i">i</button>
+                            <button type="button" class="flag-btn" data-flag="m">m</button>
+                            <button type="button" class="flag-btn" data-flag="s">s</button>
+                        </div>
+                    </div>
+                </div>
+                <textarea id="regex-text" placeholder="테스트할 텍스트를 입력하세요..." oninput="testRegex()"></textarea>
+                <div class="input-meta counter-only">
+                    <div id="regex-counter" class="char-counter">0자 · 0줄</div>
+                </div>
+                <button onclick="clearRegex()">초기화</button>
+                <div id="regex-output" class="output"></div>
+                <div class="output-actions">
+                    <button class="export-btn" onclick="copyRegex()">복사</button>
+                </div>
+                <div id="regex-status" class="status"></div>
+            </div>
+        </div>
+
+        <!-- Diff Tab -->
+        <div id="diff" class="tab-content">
+            <div class="tool-section">
+                <h2>JSON Diff</h2>
+                <div class="diff-inputs">
+                    <div>
+                        <label>원본 (A)</label>
+                        <textarea id="diff-a" placeholder="JSON A를 입력하세요..."></textarea>
+                    </div>
+                    <div>
+                        <label>비교 대상 (B)</label>
+                        <textarea id="diff-b" placeholder="JSON B를 입력하세요..."></textarea>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button onclick="compareJSON()">비교</button>
+                    <button onclick="clearDiff()">초기화</button>
+                </div>
+                <div id="diff-output" class="output diff-output"></div>
+                <div id="diff-status" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
