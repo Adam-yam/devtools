@@ -4,7 +4,11 @@ JSON · YAML · Regex를 다루는 개발자용 웹 도구입니다. 빌드 과�
 
 ## 데모
 
-`index.html`을 브라우저로 열거나, GitHub Pages로 배포한 주소에 접속하면 됩니다.
+**https://adam-yam.github.io/devtools/**
+
+별도 다운로드 없이 위 주소에서 바로 사용할 수 있습니다.
+
+로컬에서 직접 보려면 저장소 전체를 내려받아야 합니다. `style.css`, `script.js`, `pics/icon.png`가 상대경로로 연결되어 있어서 `index.html` 파일 하나만 따로 받으면 정상적으로 열리지 않습니다.
 
 ## 기능
 
@@ -52,5 +56,12 @@ JSON · YAML · Regex를 다루는 개발자용 웹 도구입니다. 빌드 과�
 
 ## 실행 방법
 
-별도 설치 없이 `index.html`을 브라우저에서 열면 됩니다.
+저장소 전체를 내려받은 뒤 `index.html`을 열면 별도 설치 없이 바로 동작합니다. (서버 실행이나 빌드 과정 불필요)
 
+```bash
+git clone https://github.com/adam-yam/devtools.git
+cd devtools
+open index.html   # 또는 브라우저에서 직접 열기
+```
+
+파일을 압축(zip)으로 받는 경우에도 `index.html`, `style.css`, `script.js`, `pics/` 폴더가 모두 같은 위치에 있어야 합니다.
